@@ -1,0 +1,476 @@
+#checklistDocuments {
+    background-color: #ffffff;
+    border-radius: 10px;
+    /* padding: 20px 20px; */
+}
+
+.Header-Title{
+    margin-bottom: 15px;
+    /* background-color: white; */
+    margin-inline: auto;
+}
+
+.Title {
+    width: 17%;
+    position: relative;
+    font-size: 17px;
+    /* line-height: 1.4; */
+    letter-spacing: 0.1em;
+    color: #fff;
+    background-color: #e27238;
+    padding: 6px 16px;
+    filter: drop-shadow(3px 3px 3px #D3D3D3);
+} 
+
+.Title::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-top: 10px solid #e27238;
+}
+
+/* #checklistDocuments h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    background-color: rgb(251 251 251);
+    border-left: 2px solid #e27238;
+    padding: 7px 10px;
+    width: max-content;
+    margin-bottom: 30px;
+    color: #e27238;
+} */
+
+#checklistDocuments .ChecklistContainer {
+    max-width: 1236px;
+    margin: 15px auto;
+}
+
+#checklistDocuments .ChecklistRequestDetails {
+    border: 5px solid hsla(0, 0%, 78.4%, .1);
+    border-radius: 4px;
+    padding: 15px;
+    /* box-shadow: 0 10px 10px #f3f3f3; */
+    margin-bottom: 32px;
+}
+
+#checklistDocuments .Checklist {
+    font-size: 15px;
+    margin: 10px 0;
+}
+
+#checklistDocuments .Checklist span{
+    font-weight: 600 !important;
+    color: #e27238;
+}
+
+#checklistDocuments .card-Icon {
+    background-color: rgba(200, 200, 200, 0.1);
+    color: #e27238;
+    border-radius: 30px;
+    padding: 10px 10px;
+    text-align: center;
+    margin-right: 12px;
+    margin-left: 3px;
+}
+
+.mb-10 {
+    margin-bottom: 10px;
+}
+
+.Header-Title {
+    margin-bottom:41px; 
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.requiredDocName {
+    font-weight: 500;
+}
+
+.Attachmentlabel {
+    cursor: pointer;
+    padding: 2px 7px 2px 7px;
+    border-radius: 8px;
+    color: #e27238;
+    background-color: #e2723800;
+    border: 1px solid #e27238;
+    margin-bottom: 7px;
+    display: block;
+    width: max-content;
+}
+
+.Attachment-wrap {
+    flex-wrap: wrap;
+    display: flex;
+}
+
+.file-name {
+    margin: 0;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.attachmentname {
+    display: flex;
+    border: 1px solid grey;
+    width: max-content;
+    padding: 3px 5px;
+    border-radius: 7px;
+    margin: 0 10px 5px 0;
+    align-items: center;
+    gap: 11px;
+}
+
+.icon-cancel {
+    padding: 3px 1px 1px 0px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.Add-Doc {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Approve-Doc {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.save-doc {
+    display: flex;
+    margin-top: 20px;
+    gap: 8px;
+}
+
+.app-doc {
+    display: flex;
+    margin-top: 20px;
+    gap: 8px;
+}
+
+.app-doc .ms-Button--primary{
+    color: #fff;
+    border: 1px solid #e27238;
+    border-radius: 5px;
+    background-color: #e27238;
+}
+
+.save-doc .ms-Button--primary {
+    color: #fff;
+    border: 1px solid #e27238;
+    border-radius: 5px;
+    background-color: #e27238;
+}
+
+.Reject-Doc .ms-Button--primary{
+    color: #fff;
+    border: 1px solid #e27238;
+    border-radius: 5px;
+    background-color: #e27238;
+}
+
+.Cancel-Doc .ms-Button--default{
+    color: #e27238;
+    background-color: #e2723800;
+    border-radius: 5px;
+    border: 1px solid #e27238;
+}
+
+.link-file {
+    text-decoration: none;
+    color: black;
+}
+
+
+/* -------------- Back-Home Page Icon ------------ */
+.Back {
+    margin-bottom: 22px;
+}
+
+.Back-Button {
+    color: #e27238;
+    background-color: #e2723800;
+    border-radius: 5px;
+    border: 1px solid #e27238;
+}
+
+
+
+.back-link{
+    text-decoration: none;
+}
+
+.Home-Page {
+    background-color: rgba(200, 200, 200, 0.1);
+    border-radius: 20px;
+    padding: 5px 4px 5px 7px;
+    font-size: 26px;
+    color: #e27238;
+}
+/* -------------- Back-Home Page Icon ------------ */
+
+
+/* -------------------- Loader - CSS ------------------- */
+.Loader-Text {
+    position: absolute;
+    left: 41%;
+    font-size: 22px;
+    top: 85%;
+    color: #e27238;
+}
+
+.LoaderBg-overlay{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: #0202025e;
+}
+
+#loading-wrapper {
+    position: fixed;
+    width: 50%;
+    height: 50%;
+    left: 24%;
+    top: 25%;
+    background-color: white;
+    border-radius: 10px;
+}
+  
+#loading-text {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    color: #999;
+    width: 100px;
+    height: 30px;
+    margin: -7px 0 0 -45px;
+    text-align: center;
+    font-family: 'PT Sans Narrow', sans-serif;
+    font-size: 20px;
+}
+  
+#loading-content {
+    display: block;
+    position: relative;
+    left: 50%;
+    top: 50%;
+    width: 170px;
+    height: 170px;
+    margin: -85px 0 0 -85px;
+    border: 3px solid #F00;
+}
+  
+#loading-content:after {
+    content: "";
+    position: absolute;
+    border: 3px solid #0F0;
+    left: 15px;
+    right: 15px;
+    top: 15px;
+    bottom: 15px;
+}
+  
+#loading-content:before {
+    content: "";
+    position: absolute;
+    border: 3px solid #00F;
+    left: 5px;
+    right: 5px;
+    top: 5px;
+    bottom: 5px;
+}
+  
+#loading-content {
+    border: 3px solid transparent;
+    border-top-color:  #e27238;;
+    border-bottom-color:  #e27238;;
+    border-radius: 50%;
+    -webkit-animation: loader 2s linear infinite;
+    -moz-animation: loader 2s linear infinite;
+    -o-animation: loader 2s linear infinite;
+    animation: loader 2s linear infinite;
+}
+  
+#loading-content:before {
+    border: 3px solid transparent;
+    border-top-color: black;
+    border-bottom-color: black;
+    border-radius: 50%;
+    -webkit-animation: loader 3s linear infinite;
+      -moz-animation: loader 2s linear infinite;
+    -o-animation: loader 2s linear infinite;
+    animation: loader 3s linear infinite;
+}
+  
+#loading-content:after {
+    border: 3px solid transparent;
+    border-top-color: lightgray;
+    border-bottom-color: lightgray;
+    border-radius: 50%;
+    -webkit-animation: loader 1.5s linear infinite;
+    animation: loader 1.5s linear infinite;
+      -moz-animation: loader 2s linear infinite;
+    -o-animation: loader 2s linear infinite;
+}
+  
+@-webkit-keyframes loaders {
+    0% {
+      -webkit-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(360deg);
+      -ms-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+}
+  
+@keyframes loader {
+    0% {
+      -webkit-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(360deg);
+      -ms-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+}
+  
+#content-wrapper {
+    color: #FFF;
+    position: fixed;
+    left: 0;
+    top: 20px;
+    width: 100%;
+    height: 100%;
+}
+  
+#header {
+    width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    height: 100px;
+    background-color: #666;
+}
+  
+#content {
+    width: 800px;
+    height: 1000px;
+    margin: 0 auto;
+    text-align: center;
+    background-color: #888;
+}
+/* -------------------- Loader - CSS ------------------- */
+
+
+/* -------------- Document Successfully - CSS  ----------------- */
+.Successfull-Document .ms-Dialog-main {
+    border-radius: 14px;
+}
+
+.confirmation-dialog {
+    text-align: center;
+    position: relative;
+}
+  
+.checkmark-circle {
+    /* background-color: #7cd13e; */
+    background-color: #e27238;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 235px;
+    left: calc(50% - 40px);
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 4px 10px rgba(0, 0, 0, .2); */
+    z-index: 111111111111;
+}
+
+.checkmark-circle .material-icons {
+    color: white;
+    font-size: 29px;
+}
+  
+.checkmark {
+    font-size: 40px;
+    color: white;
+}
+  
+.confirmation-dialog h2 {   
+    color: #444;
+}
+  
+.confirmation-dialog p {
+    /* color: #666; */
+    margin: 15px 0 30px;
+    font-size: 15px;
+}
+  
+.ok-button {
+    color: #fff;
+    border: 1px solid #e27238;
+    border-radius: 5px;
+    background-color: #e27238;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+  
+.ok-button:hover {
+    color: #e27238;
+    background-color: #e2723800;
+    border-radius: 5px;
+    border: 1px solid #e27238;
+}
+/* -------------- Document Successfully - CSS  ----------------- */
+
+
+/* --------------------------  Hide Navigation CSS --------------------------- */
+#sp-appBar {
+    display: none !important;
+}
+
+#RecommendedItems {
+    display: none !important;
+}
+
+.ms-HorizontalNavItems {
+    padding: 0 2px;
+    display: none;
+}
+
+.ms-TooltipHost {
+    display: none;
+}
+[data-automationid="SiteHeaderFollowButton"]{display: none;}
+[data-automationid="ShareSiteButton"]{display: none;}
+[data-automation-id="webPartContainer"]{display: none;}
+[data-automation-id="CanvasZone"]{margin: 0!important;}
+/* [data-automation-id="CanvasZone-SectionContainer"]{max-width: 100% !important;} */
+[data-automation-id="CanvasControl"]{margin: 0px 0!important; padding: 8px 0!important;}
+[data-automation-id="pageHeader"]{display: none;}
+[data-automation-id="CanvasZone"]{padding: 0!important;}
+[data-automation-id="CanvasSection"]{padding: 0!important;}
+#CommentsWrapper{display: none;}
+#spCommandBar{display: none;}
+/* --------------------------  Hide Navigation CSS --------------------------- */

@@ -1,0 +1,16 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": false,
+    "version": "1.14.0",
+    "libraryName": "scale-global",
+    "libraryId": "ecc29491-629e-4603-873a-13546b918a35",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "scale-global",
+    "solutionShortDescription": "scale-global description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

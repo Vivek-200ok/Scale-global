@@ -1,0 +1,411 @@
+#documentPortal h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    background-color: rgb(251 251 251);
+    border-left: 2px solid #e27238;
+    padding: 7px 10px;
+    width: max-content;
+    margin-bottom: 30px;
+    color: #e27238;
+/* color: rgb(3, 120, 124); */
+}
+
+.filedGroup {
+    display: flex;
+    align-items: end;
+    margin-bottom: 11px;
+}
+
+.line-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+}
+
+.Header-Title{
+    margin-bottom: 55px;
+    /* background-color: white; */
+    margin-inline: auto;
+}
+
+.Title {
+    width: 25%;
+    position: relative;
+    font-size: 17px;
+    /* line-height: 1.4; */
+    letter-spacing: 0.1em;
+    color: #fff;
+    background-color: #e27238;
+    padding: 6px 16px;
+    filter: drop-shadow(3px 3px 3px #D3D3D3);
+} 
+
+.Title::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-top: 10px solid #e27238;
+}
+
+/* ---- Search - CSS ---- */
+.new-search,.new-search:hover{
+    border: 1px solid #80808080;
+    border-radius: 34px;
+    height: auto;
+    padding: 7px 8px;
+    /* margin: 10px 0 10px 0; */
+    animation: none !important;
+}
+.new-search::after{
+    border: 1px solid #80808080;
+    border-radius: 34px;
+    height: auto;
+    padding: 7px 8px;
+}
+/* ---- Search - CSS ---- */
+
+
+/* ------ Detail List - CSS -------- */
+.ms-Viewport {
+    margin-top: 10px;
+    box-sizing: border-box;
+    border: 0 solid #e5e7eb;
+    border-radius: .75rem;
+    border-width: 1px;
+    --tw-shadow: 0 2px 3px 0 rgba(0, 0, 0, .1), 0 1px 2px -1px rgba(0, 0, 0, .1);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+    /* padding: 1rem; */
+    overflow: hidden;
+    line-height: 18px;
+}
+
+.ms-DetailsList  {
+    overflow: hidden;
+}
+
+.ms-DetailsRow {
+    font-size: 12px;
+    color: black;
+}
+/* ------ Detail List - CSS -------- */
+
+
+/* ----- Icon - CSS ----- */
+.Request-Icon {
+    display: flex;
+    gap : 13px;
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.Read-Icon .read-doc{
+    color: black;
+}
+
+.Edit-Icon {
+    color: green;
+}
+
+.Delete-Icon {
+    color: red;
+}
+
+.close-Icon {
+    color: #a8a8a8;
+    font-size: 17px;
+    cursor: pointer;
+    position: absolute;
+    top: 16px;
+    right: 1px;
+    transition: all .4s;
+}
+/* ----- Icon - CSS ----- */
+
+
+/*  ------ Add Button - Add DialogBox - CSS ------- */
+.Add-Request .ms-Button--primary{
+    text-align: end;
+    color: #fff;
+    border: 1px solid #e27238;
+    border-radius: 5px;
+    background-color: #e27238;
+}
+
+.Add-Checklist {
+    display: flex;
+    justify-content: flex-end;
+    right: 15px;
+}
+
+.Add-RequestCheck {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Add-Submit {
+    display: flex;
+    margin-top: 20px;
+}
+
+.Cancel-Request {
+    display: flex;
+    margin-top: 20px;
+}
+
+.Add-Submit .ms-Button--primary {
+    color: #fff;
+    border: 1px solid #e27238;
+    border-radius: 5px;
+    background-color: #e27238;
+}
+
+.Cancel-Request .ms-Button--default {
+    color: #e27238;
+    background-color: #e2723800;
+    border-radius: 5px;
+    border: 1px solid #e27238;
+} 
+
+.Add-Dialog .ms-Dialog-title {
+    text-align: left;
+    color: #e27238;
+}
+
+.Add-Dialog .ms-Dialog-main {
+    border-radius: 14px;
+}
+
+.DocTag {
+    display: flex;
+    border: 1px solid grey;
+    width: max-content;
+    padding: 3px 4px 4px 9px;
+    border-radius: 19px;
+    margin: 0 10px 5px 0;
+    align-items: center;
+    gap: 11px;
+}
+
+.icon-cancel {
+    padding: 2px 0px 0px 0px;
+    cursor: pointer;
+}
+
+.Add-RequiredDocument {
+    flex-wrap: wrap;
+    display: flex;
+}
+
+.save-doocument {
+    display: flex;
+    margin-top: 20px;
+    gap: 8px;
+}
+
+.save-doocument .ms-Button--primary {
+    color: #fff;
+    border: 1px solid #e27238;
+    border-radius: 5px;
+    background-color: #e27238;
+}
+
+.Cancel-Doc .ms-Button--default {
+    color: #e27238;
+    background-color: #e2723800;
+    border-radius: 5px;
+    border: 1px solid #e27238;
+}
+
+.Add-SaveDoc .ms-Button--primary {
+    color: #e27238;
+    background-color: #e2723800;
+    border-radius: 5px;
+    border: 1px solid #e27238;
+
+}
+
+.Add-custom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Add-CustomDocument .ms-Button--primary {
+    border-radius: 5px;
+} 
+
+.Add-Save .ms-Dialog-main {
+    border-radius: 14px;
+}
+
+.Checklist-Documentheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 5px 0;
+}
+/*  ------ Add Button - Add DialogBox - CSS ------- */
+
+
+/*  ------ Edit Button - Edit DialogBox - CSS ------- */
+.Edit-RequestCheck {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+
+.Edit-Submit {
+    display: flex;
+    margin-top: 20px;
+}
+
+.Edit-Submit .ms-Button--primary {
+    color: #fff;
+    border: 1px solid #e27238;
+    border-radius: 5px;
+    background-color: #e27238;
+}
+
+.Edit-Cancel-Request {
+    display: flex;
+    margin-top: 20px;
+}
+
+.Edit-Cancel-Request .ms-Button--default {
+    color: #e27238;
+    background-color: #e2723800;
+    border-radius: 5px;
+    border: 1px solid #e27238;
+}
+
+.Update-Dialog .ms-Dialog-title {
+    text-align: left;
+    color: #e27238;
+}
+
+.Update-Dialog .ms-Dialog-main {
+    border-radius: 14px;
+}
+/*  ------ Edit Button - Edit DialogBox - CSS ------- */
+
+
+/* ------ Delete Button-Dialog - CSS -------- */
+.Delet-Dialog .ms-Dialog-main {
+    border-radius: 16px 16px 16px 16px;
+}
+
+.Delet-Dialog .ms-Dialog-title {
+    border: none;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    border-bottom: none;
+    padding: 20px 24px 20px;
+    background: linear-gradient(to right, #ff6b6b, #ff8787);
+    border-radius: 16px 16px 0 0;
+    color: white;
+}
+
+.Warinig-Ic {
+    font-size: 45px;
+    color: #ff6b6b;
+}
+
+.confirm-text {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.confirm-icon  {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    color: #a8a8a8;
+    font-size: 17px;
+    cursor: pointer;
+    position: absolute;
+    top: -41px;
+    right: -6px;
+}
+
+.confirm-icon:hover{
+    opacity: 1;
+}
+
+.delete-msg {
+    padding: 22px 55px;
+    font-size: 16px;
+    color: #495057;
+    text-align: center;
+}
+
+.Delet-buttons {
+    display: flex;
+    border-top: none;
+    justify-content: end;
+    gap: 11px;
+}
+
+.cancel-Icon {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all .2s;
+    background-color: #e9ecef;
+    border: none;
+    color: #495057
+}
+
+.cancel-Icon:hover{
+    background-color: #dee2e6;
+}
+
+.delete-icon {
+    border-radius: 10px;
+    background: linear-gradient(to right, #ff6b6b, #ff8787);
+    border: none;
+}
+
+.delete-icon:hover{
+    background: linear-gradient(to right, #fa5252, #ff6b6b);
+    transform: translateY(-1px);
+    border: none;
+}
+
+.mb-0{color: black;}
+
+/* ------ Delete Button-Dialog - CSS -------- */
+
+/* .mb-5 {
+    margin : 5px 0;
+} */
+
+
+
+#sp-appBar {
+    display: none !important;
+}
+
+.ms-HorizontalNavItems {
+    padding: 0 2px;
+    display: none;
+}
+
+.ms-TooltipHost {
+    display: none;
+}
+[data-automationid="SiteHeaderFollowButton"]{display: none;}
+[data-automationid="ShareSiteButton"]{display: none;}
+[data-automation-id="CanvasZone"]{margin: 0!important;}
+/* [data-automation-id="CanvasZone-SectionContainer"]{max-width: 100% !important;} */
+[data-automation-id="CanvasControl"]{margin: 0px 0!important; padding: 8px 0!important;}
+[data-automation-id="pageHeader"]{display: none;}
+[data-automation-id="CanvasZone"]{padding: 0!important;}
+[data-automation-id="CanvasSection"]{padding: 0!important;}
+#CommentsWrapper{display: none;}
+#spCommandBar{display: none;}

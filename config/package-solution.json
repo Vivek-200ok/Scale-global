@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "scale-global-client-side-solution",
+    "id": "ecc29491-629e-4603-873a-13546b918a35",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.14.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "scale-global description"
+      },
+      "longDescription": {
+        "default": "scale-global description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "scale-global Feature",
+        "description": "The feature that activates elements of the scale-global solution.",
+        "id": "3b722121-b367-4fa8-a7c6-35d93fe11348",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/scale-global.sppkg"
+  }
+}

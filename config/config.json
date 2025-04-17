@@ -1,0 +1,27 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "document-portal-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/documentPortal/DocumentPortalWebPart.js",
+          "manifest": "./src/webparts/documentPortal/DocumentPortalWebPart.manifest.json"
+        }
+      ]
+    },
+    "checklist-documents-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/checklistDocuments/ChecklistDocumentsWebPart.js",
+          "manifest": "./src/webparts/checklistDocuments/ChecklistDocumentsWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "DocumentPortalWebPartStrings": "lib/webparts/documentPortal/loc/{locale}.js",
+    "ChecklistDocumentsWebPartStrings": "lib/webparts/checklistDocuments/loc/{locale}.js"
+  }
+}
