@@ -110,6 +110,14 @@
     display: flex;
 }
 
+.attachement-name {
+    margin: 0;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
 .file-name {
     margin: 0;
     display: -webkit-box;
@@ -121,6 +129,17 @@
 .attachmentname {
     display: flex;
     border: 1px solid grey;
+    width: max-content;
+    padding: 3px 5px;
+    border-radius: 7px;
+    margin: 0 10px 5px 0;
+    align-items: center;
+    gap: 11px;
+}
+
+.filename {
+    display: flex;
+    border: 1px solid gray;
     width: max-content;
     padding: 3px 5px;
     border-radius: 7px;

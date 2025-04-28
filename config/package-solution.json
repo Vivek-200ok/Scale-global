@@ -3,7 +3,7 @@
   "solution": {
     "name": "scale-global-client-side-solution",
     "id": "ecc29491-629e-4603-873a-13546b918a35",
-    "version": "1.0.0.0",
+    "version": "1.0.0.4",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,

@@ -7,6 +7,7 @@ import { DefaultButton, Icon, PrimaryButton } from '@fluentui/react';
 import { IItem, Item } from '@pnp/sp/items';
 import { Attachment, Attachments, IAttachmentInfo } from '@pnp/sp/attachments';
 import { Dialog, IIconProps } from 'office-ui-fabric-react';
+import { HttpClient, IHttpClientOptions } from '@microsoft/sp-http';
 
 
 export interface IChecklistDocumentsState {
@@ -22,7 +23,11 @@ export interface IChecklistDocumentsState {
   CurrentUserEmail: any;
   ChecklistData: any;
   Isloader: boolean;
-  DocumentUploadedSuccessfully : boolean;
+  DocumentUploadedSuccessfully: boolean;
+  AdminChecklistRequestAttachmentDocuments: any;
+  AdminUploadedDocuments: any;
+  AdminUploadedRemovedFile: any;
+  AdminRemoveAttachments: any;
 }
 
 const navigateBackIcon: IIconProps = { iconName: 'NavigateBack' };
@@ -31,7 +36,7 @@ const DocumentUploadedSuccessfullyDialogContentProps = {
 };
 
 const documentmodelProps = {
-  className : "Successfull-Document"
+  className: "Successfull-Document"
 };
 
 
@@ -55,7 +60,11 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
       CurrentUserEmail: "",
       ChecklistData: "",
       Isloader: false,
-      DocumentUploadedSuccessfully : true
+      DocumentUploadedSuccessfully: true,
+      AdminChecklistRequestAttachmentDocuments: [],
+      AdminUploadedRemovedFile: [],
+      AdminUploadedDocuments: [],
+      AdminRemoveAttachments: []
     };
   }
 
@@ -74,7 +83,7 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
 
           <div className='Back'>
             {/* <a className='back-link' href={this.props.context.pageContext._web.absoluteUrl + '/SitePages/Checklist-Request.aspx'} target="_self" data-interception="off"> */}
-             <PrimaryButton className="Back-Button" iconProps={navigateBackIcon}  text='Back' href={this.props.context.pageContext._web.absoluteUrl + '/SitePages/Checklist-Request.aspx'} target="_self" data-interception="off"/>
+            <PrimaryButton className="Back-Button" iconProps={navigateBackIcon} text='Back' href={this.props.context.pageContext._web.absoluteUrl + '/SitePages/Checklist-Request.aspx'} target="_self" data-interception="off" />
             {/* </a> */}
           </div>
 
@@ -108,73 +117,150 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
             <h2 className='Title'>Checklist Documents</h2>
           </div>
 
+          {/* /ADMIN VIEW */}
           <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
             <thead>
               <tr style={{ backgroundColor: '#fbfbfb', fontWeight: 'bold' }}>
-                <th style={{ padding: '10px', width: '200px', border: '1px solid #ccc' }}>Documents</th>
-                <th style={{ padding: '10px', width: '950px', border: '1px solid #ccc' }}>Upload Documents</th>
-                <th style={{ padding: '10px', width: '250px', border: '1px solid #ccc' }}>Notes</th>
+                <th style={{ padding: '10px', width: '15%', border: '1px solid #ccc' }}>Documents</th>
+                <th style={{ padding: '10px', width: '42.5%', border: '1px solid #ccc' }}>Scale Global Documents</th>
+                <th style={{ padding: '10px', width: '42.5%', border: '1px solid #ccc' }}>Upload Documents</th>
               </tr>
             </thead>
             <tbody>
-              {this.state.CheckListRequestData.length > 0 &&
-                this.state.CheckListRequestData.map((item) => (
+              {this.state.AdminChecklistRequestAttachmentDocuments.length > 0 &&
+                this.state.AdminChecklistRequestAttachmentDocuments.map((item) => (
                   <tr key={item.Id}>
                     <td style={{ padding: '10px', border: '1px solid #ccc' }}>
                       <div className="requiredDocName">{item.Title}</div>
                     </td>
 
                     <td style={{ padding: '10px', border: '1px solid #ccc' }}>
-                      {!this.state.IsAdmin && (
-                        <>
-
-                          <label className="Attachmentlabel" htmlFor={item.Title}>
-                            Upload Document
-                          </label>
-                          <input
-                            style={{ display: 'none' }}
-                            id={item.Title}
-                            type="file"
-                            multiple
-                            onChange={(e) => this.UploadAttachments(e.target.files, item.Id)}
-                          />
-                        </>
-                      )}
+                      {
+                        this.state.IsAdmin && (
+                          <>
+                            <label className="Attachmentlabel" htmlFor={item.Title}>
+                              Upload Document
+                            </label>
+                            <input
+                              style={{ display: 'none' }}
+                              id={item.Title}
+                              type="file"
+                              multiple
+                              onChange={(e) => this.AdminUploadAttachments(e.target.files, item.Id)}
+                            />
+                          </>
+                        )
+                      }
 
                       <div className="Attachment-wrap">
                         {item.Attachments &&
                           item.Attachments.map((i) => (
                             <div className="attachmentname" key={i.FileName}>
-                              <a className="link-file" href={'https://200oksolutions.sharepoint.com' + i.ServerRelativeUrl} target="_self" data-interception="off"><p className="file-name">{i.FileName}</p></a>
-
-                              <Icon
-                                iconName="Cancel"
-                                className="icon-cancel"
-                                onClick={() => this.RemoveAttachments(item.Id, i.FileName)}
-                              />
+                              <a className="link-file" href={'https://200oksolutions.sharepoint.com' + i.ServerRelativeUrl + "?web=1"} target="_blank" data-interception="off">
+                                <p className="attachement-name">{i.FileName}</p>
+                              </a>
+                            {
+                              this.state.IsAdmin && (
+                                <>
+                                  <Icon
+                                    iconName="Cancel"
+                                    className="icon-cancel"
+                                    onClick={() => this.AdminRemoveAttachments(item.Id, i.FileName)}
+                                  />
+                                </>
+                              )
+                            }
+                              
                             </div>
                           ))}
                         {item.file &&
                           item.file.map((i) => (
-                            <div className="attachmentname" key={i.name}>
+                            <div className="filename" key={i.name}>
                               <p className="file-name">{i.name}</p>
-                              <Icon
-                                iconName="Cancel"
-                                className="icon-cancel"
-                                onClick={() => this.RemoveUploadedDoc(item.Id, i.name)}
-                              />
+                              {
+                                this.state.IsAdmin && (
+                                  <>
+                                    <Icon
+                                      iconName="Cancel"
+                                      className="icon-cancel"
+                                      onClick={() => this.AdminRemoveUploadedDocs(item.Id, i.name)}
+                                    />
+                                  </>
+                                )
+                              }
+                      
                             </div>
                           ))}
                       </div>
                     </td>
 
+                    <td style={{ padding: '10px', border: '1px solid #ccc' }}>
 
-                    <td style={{ padding: '10px', border: '1px solid #ccc' }}>{item.Notes}</td>
+                      {
+                        !this.state.IsAdmin && (
+                          <>
+                            <label className="Attachmentlabel" htmlFor={item.Title}>
+                              Upload Document
+                            </label>
+                            <input
+                              style={{ display: 'none' }}
+                              id={item.Title}
+                              type="file"
+                              multiple
+                              onChange={(e) => this.UploadAttachments(e.target.files, item.Id, item.Title)}
+                            />
+                          </>
+                        )
+                      }
+                      {
+                        this.state.CheckListRequestData.length > 0 &&
+                        this.state.CheckListRequestData.filter((Useritem) => Useritem.Title === item.Title).map((Useritem) => (
+                            <div className="Attachment-wrap" key={Useritem.Id}>
+                              {Useritem.Attachments &&
+                                Useritem.Attachments.map((i) => (
+                                  <div className="attachmentname" key={i.FileName}>
+                                    <a
+                                      className="link-file"
+                                      href={'https://200oksolutions.sharepoint.com' + i.ServerRelativeUrl + "?web=1"}
+                                      target="_blank"
+                                      data-interception="off"
+                                    >
+                                      <p className="attachement-name">{i.FileName}</p>
+                                    </a>
+                                    {
+                                      this.state.IsAdmin && (
+                                        <>
+                                          <Icon
+                                            iconName="Cancel"
+                                            className="icon-cancel"
+                                            onClick={() => this.RemoveAttachments(Useritem.Id, i.FileName)}
+                                          />
+                                        </>
+                                      )
+                                    }
+                                   
+                                  </div>
+                                ))}
+                              {Useritem.file &&
+                                Useritem.file.map((i) => (
+                                  <div className="filename" key={i.name}>
+                                    <p className="file-name">{i.name}</p>
+                                          <Icon
+                                            iconName="Cancel"
+                                            className="icon-cancel"
+                                            onClick={() => this.RemoveUploadedDoc(Useritem.Id, i.name)}
+                                          />
+                                  </div>
+                                ))}
+                            </div>
+                          ))
+                      }
+                    </td>
+
                   </tr>
                 ))}
             </tbody>
           </table>
-
         </div>
 
         {
@@ -194,7 +280,7 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
           hidden={this.state.DocumentUploadedSuccessfully}
           onDismiss={() =>
             this.setState({
-              DocumentUploadedSuccessfully : true
+              DocumentUploadedSuccessfully: true
             })
           }
           dialogContentProps={DocumentUploadedSuccessfullyDialogContentProps}
@@ -203,7 +289,7 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
         >
           <div className="confirmation-dialog">
             <div className="checkmark-circle">
-            <Icon iconName='CheckMark' className='material-icons'/>
+              <Icon iconName='CheckMark' className='material-icons' />
             </div>
             <h2>Awesome!</h2>
             <p>Your Document has been Uploaded Successfully.!!</p>
@@ -211,8 +297,35 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
               OK
             </PrimaryButton>
           </div>
-           
+
         </Dialog>
+
+        {
+          this.state.IsAdmin && (
+            <>
+              <div className='ms-Grid-row'>
+                <div className='Add-Doc'>
+                  <div className='ms-Grid-col save-doc'>
+
+                    <PrimaryButton
+                      text='Submit'
+                      onClick={() => {
+                        this.AdminAddDocuments(); 
+                        this.triggerFlow(this.state.AdminChecklistRequestAttachmentDocuments,"Admin","");
+                      }}
+                    />
+
+                    <div className='Cancel-Doc'>
+                      <DefaultButton
+                        text='Cancel' onClick={() => this.setState({})}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )
+        }
 
         {
           !this.state.IsAdmin && (
@@ -223,47 +336,23 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
 
                     <PrimaryButton
                       text='Submit'
-                      onClick={() => this.AddRequestDocument()}
+                      onClick={() => {
+                        this.AddRequestDocument(); 
+                        this.triggerFlow(this.state.CheckListRequestData[0].CompanyEmail,"User",this.state.CheckListRequestData[0].CompanyNames);
+                      }}
                     />
 
                     <div className='Cancel-Doc'>
                       <DefaultButton
-                        text='Cancel' onClick={() => this.setState({  })}
+                        text='Cancel' onClick={() => this.setState({})}
                       />
                     </div>
                   </div>
                 </div>
               </div>
             </>
-          )}
-
-        {
-          this.state.IsAdmin && (
-            <>
-              <div className='ms-Grid-row'>
-                <div className='Approve-Doc'>
-                  <div className='ms-Grid-col app-doc'>
-                    <PrimaryButton
-                      text='Approved'
-                    />
-
-                    <div className='Reject-Doc'>
-                      <PrimaryButton
-                        text='Return'
-                      />
-                    </div>
-
-                    <div className='Return-Doc'>
-                      <PrimaryButton
-                        text='Rejected'
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
+          )
+        }
       </div>
     );
   }
@@ -271,6 +360,7 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
   public async componentDidMount() {
     await this.GetChecklistDocuments();
     await this.GetCurrentUser();
+    this.HideNavigation();
   }
 
   public async GetCurrentUser() {
@@ -309,10 +399,6 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
     }
   }
 
-  public async ReivewerControls(Status) {
-
-  }
-
   public async GetChecklistDocuments() {
     try {
       console.log("Current URL:", window.location.href);
@@ -321,8 +407,9 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
       if (requestid) {
         console.log("RequestID:", requestid);
         this.setState({ requestID: requestid });
-        this.GetChecklistRequestDetails(requestid)
+        this.GetChecklistRequestDetails(requestid);
         this.GetRequestDocuments(requestid);
+        this.GetAdminUploadedDocuments(requestid);
       } else {
         console.log("RequestID not found in URL");
       }
@@ -336,8 +423,7 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
       "ID",
       "Title",
       "RequestID/Id",
-      "Attachments",
-      "Notes",
+      "Attachments"
     ).expand("RequestID").filter(`RequestID/Id eq ${ID}`).orderBy("ID", false).get().then((data) => {
       let AllData = [];
       console.log(data);
@@ -354,7 +440,7 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
             RequestID: item.RequestID ? item.RequestID.Id : "",
             Attachments: info,
             isfilechanged: false,
-            Notes: item.Notes
+       
           });
           this.setState({ CheckListRequestData: AllData });
           console.log(this.state.CheckListRequestData);
@@ -376,66 +462,14 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
         "Status"
       ).expand("ChecklistName").filter(`Id eq ${ID}`).get();
       this.setState({ ChecklistData: checklist });
-      console.log(this.state.ChecklistData)
+      console.log(this.state.ChecklistData);
     } catch (error) {
       console.log(error);
     }
 
   }
 
-  // public async GetChecklistRequestlist(ID) {
-  //   const checklists = await sp.web.lists.getByTitle("Checklist Requests").items.select(
-  //     "ID",
-  //     "CompanyName",
-  //     "ChecklistName/ChecklistName",
-  //     "ChecklistName/ID",
-  //     "CompanyEmail",
-  //     "RequiredDocuments"
-  //   ).expand("ChecklistName").filter(`ID eq ` + ID).get().then((data) => {
-  //     let ReqDoc = [];
-  //     console.log(data);
-  //     console.log(checklists);
-
-  //     let documentDetails = [];
-
-  //     if(data.length > 0 ) {
-  //       data.forEach((item) => {
-  //         item.RequiredDocuments.forEach((doc) => {
-  //           ReqDoc.push({
-  //             doc 
-  //          });
-  //         });
-
-  //       });
-  //       this.setState({ CheckListDocumentData : ReqDoc });
-  //       console.log(this.state.CheckListDocumentData);
-  //     }
-
-  //     if(data.length > 0){
-  //       data.forEach((item) => {
-  //         documentDetails.push({
-  //           ID : item.Id ? item.Id : "",
-  //           CompanyName : item.CompanyName ? item.CompanyName : "",
-  //           ChecklistName : item.ChecklistName ? item.ChecklistName.ChecklistName : "",
-  //           ChecklistNameId : item.ChecklistName ? item.ChecklistName.ID : "",
-  //           CompanyEmail : item.CompanyEmail ? item.CompanyEmail : "",
-  //           RequiredDocuments : item.RequiredDocuments ? item.RequiredDocuments : ""
-  //         });
-  //       });
-  //       this.setState({ RequestDocumentDetails : documentDetails });
-  //       console.log(this.state.RequestDocumentDetails);
-  //     }
-  //   }).catch((error) => {
-  //     console.log(error);
-  //   });
-  // }
-
   public async AddRequestDocument() {
-    // const addreqdoc = await sp.web.lists.getByTitle("Request Document").items.add({
-    //   Notes : this.state.Notes
-    // }).catch((error) => {
-    //   console.log(error);
-    // });
 
     this.setState({ Isloader: true });
 
@@ -467,12 +501,13 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
     }
     this.setState({ Isloader: false });
     this.setState({ UploadDocuments: [] });
-    this.setState({ DocumentUploadedSuccessfully : false });
+    this.setState({ DocumentUploadedSuccessfully: false });
+    this.GetRequestDocuments(this.state.requestID);
   }
 
-  public async UploadAttachments(files, id: number) {
+  public async UploadAttachments(files, id: number,Title) {
     const updatedChecklist = this.state.CheckListRequestData.map(item => {
-      if (item.Id === id) {
+      if (item.Title === Title) {
         return {
           ...item,
           file: item.file ? [...item.file, ...files] : [...files],
@@ -484,12 +519,15 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
       }
     });
 
+    const filteredData = this.state.CheckListRequestData.filter(item => item.Title === Title);
+    console.log("Filtered Data:", filteredData);
+
     const uploadeddoc = this.state.UploadDocuments;
 
     const fileArray = [...files];
     fileArray.map(item => {
       uploadeddoc.push({
-        Id: id,
+        Id: filteredData[0].Id,
         FileName: item.name,
         file: item
       });
@@ -560,6 +598,204 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
     console.log(this.state.RemoveAttachment);
   }
 
+  // public async GetAdminUploadedDocuments(ID) {
+  //   const Reqdoc = await sp.web.lists.getByTitle("Admin Documents").items.select(
+  //     "ID",
+  //     "Title",
+  //     "RequestID/Id",
+  //     "Attachments",
+  //     "Notes",
+  //   ).expand("RequestID").filter(`RequestID/Id eq ${ID}`).orderBy("ID", false).get().then((data) => {
+  //     let AllData = [];
+  //     console.log(data);
+  //     console.log(Reqdoc);
+  //     if (data.length > 0) {
+  //       data.forEach(async (item, i) => {
+
+  //         const item1: IItem = sp.web.lists.getByTitle("Admin Documents").items.getById(item.Id);
+  //         const info: IAttachmentInfo[] = await item1.attachmentFiles();
+
+  //         AllData.push({
+  //           Id: item.Id ? item.Id : "",
+  //           Title: item.Title ? item.Title : "",
+  //           RequestID: item.RequestID ? item.RequestID.Id : "",
+  //           Attachments: info,
+  //           isfilechanged: false,
+  //           Notes: item.Notes
+  //         });
+  //         this.setState({ AdminChecklistRequestAttachmentDocuments: AllData });
+  //         console.log(this.state.AdminChecklistRequestAttachmentDocuments);
+  //       });
+  //     }
+  //   });
+  // }
+
+  public async GetAdminUploadedDocuments(ID) {
+    try {
+      const data = await sp.web.lists.getByTitle("Admin Documents").items
+        .select("ID", "Title", "RequestID/Id", "Attachments")
+        .expand("RequestID")
+        .filter(`RequestID/Id eq ${ID}`)
+        .top(5000) // to ensure enough items
+        .get();
+  
+      // Sort by ID descending (client-side)
+      const sortedData = data.sort((a, b) => b.ID - a.ID);
+  
+      // Parallel attachment fetching
+      const allData = await Promise.all(
+        sortedData.map(async (item) => {
+          const itemRef: IItem = sp.web.lists.getByTitle("Admin Documents").items.getById(item.ID);
+          const info: IAttachmentInfo[] = await itemRef.attachmentFiles();
+  
+          return {
+            Id: item.ID ?? "",
+            Title: item.Title ?? "",
+            RequestID: item.RequestID?.Id ?? "",
+            Attachments: info,
+            isfilechanged: false,
+            
+          };
+        })
+      );
+  
+      // Update state once with full array
+      this.setState({ AdminChecklistRequestAttachmentDocuments: allData });
+      console.log(allData);
+  
+    } catch (error) {
+      console.error("Error fetching Admin Uploaded Documents:", error);
+    }
+  }
+  
+
+  public async AdminAddDocuments() {
+    this.setState({ Isloader: true });
+
+    for (let i = 0; i < this.state.RemoveAttachment.length; i++) {
+      const file = this.state.RemoveAttachment[i];
+
+      try {
+        const item1: IItem = await sp.web.lists.getByTitle("Request Document").items.getById(file.Id);
+        await item1.attachmentFiles.getByName(file.FileName).delete();
+        console.log(`Delete file: ${file.FileName}`);
+      } catch (eror) {
+        console.log(`Error: ${file.FileName}`);
+      }
+    }
+    this.setState({ RemoveAttachment: [] });
+
+    for (let i = 0; i < this.state.AdminRemoveAttachments.length; i++) {
+      const file = this.state.AdminRemoveAttachments[i];
+
+      try {
+        const item1: IItem = await sp.web.lists.getByTitle("Admin Documents").items.getById(file.Id);
+        await item1.attachmentFiles.getByName(file.FileName).delete();
+        console.log(`Admin Delete file: ${file.FileName}`);
+      } catch (eror) {
+        console.log(`Error: ${file.FileName}`);
+      }
+    }
+    this.setState({ AdminRemoveAttachments: [] });
+
+    for (let i = 0; i < this.state.AdminUploadedDocuments.length; i++) {
+      const file = this.state.AdminUploadedDocuments[i];
+
+      try {
+        const item: IItem = await sp.web.lists.getByTitle("Admin Documents").items.getById(file.Id);
+        await item.attachmentFiles.add(file.FileName, file.file);
+
+        console.log(`Admin Uploaded: ${file.FileName}`);
+      } catch (error) {
+        console.log(`Error uploading file ${file.FileName}:`, error);
+      }
+
+    }
+    this.setState({ Isloader: false });
+    this.setState({ AdminUploadedDocuments: []});
+    this.setState({ DocumentUploadedSuccessfully: false });
+    this.GetAdminUploadedDocuments(this.state.requestID);
+  }
+
+  public async AdminUploadAttachments(files, id: number) {
+    const updatedChecklist = this.state.AdminChecklistRequestAttachmentDocuments.map(item => {
+      if (item.Id === id) {
+        return {
+          ...item,
+          file: item.file ? [...item.file, ...files] : [...files],
+          isfilechanged: true,
+        };
+      }
+      else {
+        return item;
+      }
+    });
+
+    const uploadeddoc = this.state.AdminUploadedDocuments;
+
+    const fileArray = [...files];
+    fileArray.map(item => {
+      uploadeddoc.push({
+        Id: id,
+        FileName: item.name,
+        file: item
+      });
+    });
+
+    this.setState({ AdminUploadedDocuments: uploadeddoc });
+    console.log(this.state.AdminUploadedDocuments);
+    this.setState({ AdminChecklistRequestAttachmentDocuments: updatedChecklist, AdminUploadedDocuments: uploadeddoc });
+    console.log("Admin Uploaded Documents :", this.state.AdminChecklistRequestAttachmentDocuments);
+  }
+
+  public async AdminRemoveAttachments(id: number, fileName: string) {
+    const updated = this.state.AdminChecklistRequestAttachmentDocuments.map(item => {
+      if (item.Id === id) {
+        const updatedFiles = item.Attachments.filter(f => f.FileName !== fileName);
+        return {
+          ...item,
+          Attachments: updatedFiles
+        };
+      }
+      else {
+        return item;
+      }
+    });
+
+    let DeleteDOCS = this.state.AdminRemoveAttachments;
+    DeleteDOCS.push({
+      FileName: fileName,
+      Id: id
+    });
+
+    this.setState({ AdminChecklistRequestAttachmentDocuments: updated, AdminRemoveAttachments: DeleteDOCS });
+    console.log(this.state.AdminChecklistRequestAttachmentDocuments);
+    console.log(this.state.AdminRemoveAttachments);
+  }
+
+  public async AdminRemoveUploadedDocs(id: number, file) {
+    const fileToRemove = file;
+
+    const updatedChecklist = this.state.AdminChecklistRequestAttachmentDocuments.map(item => {
+      if (item.Id === id) {
+        const files = Array.isArray(item.file) ? item.file : [item.file]; // force it into array
+        const updatedoc = files.filter(f => f.name !== fileToRemove);
+        return {
+          ...item,
+          file: updatedoc,
+        };
+      }
+      return item;
+    });
+
+    const updatedoc = this.state.AdminUploadedDocuments;
+    updatedoc.filter(f => f.FileName !== fileToRemove);
+
+    this.setState({ AdminChecklistRequestAttachmentDocuments: updatedChecklist, AdminUploadedDocuments: updatedoc });
+    console.log(this.state.AdminChecklistRequestAttachmentDocuments);
+    console.log(this.state.RemoveUploadedFile);
+  }
+
   public async HideNavigation() {
 
     try {
@@ -591,5 +827,82 @@ export default class ChecklistDocuments extends React.Component<IChecklistDocume
     }
 
   }
+
+  public triggerFlow = async(companyEmail: string, currentUserRole: string, companyName : string) => {
+
+    const flowUrl = "https://prod-06.centralindia.logic.azure.com:443/workflows/f9c7dbdbb8d04e05bc0d2ad307fc1cd3/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=4PeSm2lAGiBIQSEp36Q8GrLXOMutIAASOv3mD5pWyrs";
+
+    const requestBody = {
+      companyEmail,
+      currentUserRole,
+      companyName
+    };
+
+    const httpOptions: IHttpClientOptions = {
+      body: JSON.stringify(requestBody),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
+
+    try {
+      const response = await this.props.context.httpClient.post(flowUrl, HttpClient.configurations.v1, httpOptions);
+      if (response.ok) {
+        console.log("Flow triggered successfully");
+      } else {
+        console.error("Failed to trigger flow", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error triggering flow", error);
+    }
+
+  }
+
+  // public async GetChecklistRequestlist(ID) {
+  //   const checklists = await sp.web.lists.getByTitle("Checklist Requests").items.select(
+  //     "ID",
+  //     "CompanyName",
+  //     "ChecklistName/ChecklistName",
+  //     "ChecklistName/ID",
+  //     "CompanyEmail",
+  //     "RequiredDocuments"
+  //   ).expand("ChecklistName").filter(`ID eq ` + ID).get().then((data) => {
+  //     let ReqDoc = [];
+  //     console.log(data);
+  //     console.log(checklists);
+
+  //     let documentDetails = [];
+
+  //     if(data.length > 0 ) {
+  //       data.forEach((item) => {
+  //         item.RequiredDocuments.forEach((doc) => {
+  //           ReqDoc.push({
+  //             doc 
+  //          });
+  //         });
+
+  //       });
+  //       this.setState({ CheckListDocumentData : ReqDoc });
+  //       console.log(this.state.CheckListDocumentData);
+  //     }
+
+  //     if(data.length > 0){
+  //       data.forEach((item) => {
+  //         documentDetails.push({
+  //           ID : item.Id ? item.Id : "",
+  //           CompanyName : item.CompanyName ? item.CompanyName : "",
+  //           ChecklistName : item.ChecklistName ? item.ChecklistName.ChecklistName : "",
+  //           ChecklistNameId : item.ChecklistName ? item.ChecklistName.ID : "",
+  //           CompanyEmail : item.CompanyEmail ? item.CompanyEmail : "",
+  //           RequiredDocuments : item.RequiredDocuments ? item.RequiredDocuments : ""
+  //         });
+  //       });
+  //       this.setState({ RequestDocumentDetails : documentDetails });
+  //       console.log(this.state.RequestDocumentDetails);
+  //     }
+  //   }).catch((error) => {
+  //     console.log(error);
+  //   });
+  // }
 
 }

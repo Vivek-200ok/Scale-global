@@ -2,10 +2,10 @@ import * as React from 'react';
 import styles from './DocumentPortal.module.scss';
 import { IDocumentPortalProps } from './IDocumentPortalProps';
 import { escape } from '@microsoft/sp-lodash-subset';
-import { DefaultButton, DetailsList, Dialog, Dropdown, IColumn, Icon, IIconProps, Label, PrimaryButton, SearchBox, TextField } from 'office-ui-fabric-react';
+import { DefaultButton, DetailsList, Dialog, Dropdown, IColumn, Icon, IIconProps, Label, PrimaryButton, SearchBox, TextField, TooltipHost } from 'office-ui-fabric-react';
 import { sp } from '@pnp/sp';
 import { Item } from '@pnp/sp/items';
-
+import { HttpClient, IHttpClientOptions } from '@microsoft/sp-http';
 
 
 export interface IDocumentPortalState {
@@ -43,6 +43,9 @@ export interface IDocumentPortalState {
   IsAdmin : boolean;
   CurrentUserEmail : any;
   MyChecklistRequestData : any;
+  SendChecklistRequestDocuments : any;
+  SelectedItems : any;
+
 }
 
 const addIcon: IIconProps = { iconName: 'Add' };
@@ -95,9 +98,13 @@ const deletmodelProps = {
   className : "Delet-Dialog"
 };
 
+
+
 require("../assets/css/style.css");
 require("../assets/css/fabric.min.css");
 
+
+// https://prod-06.centralindia.logic.azure.com:443/workflows/f9c7dbdbb8d04e05bc0d2ad307fc1cd3/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=4PeSm2lAGiBIQSEp36Q8GrLXOMutIAASOv3mD5pWyrs
 
 export default class DocumentPortal extends React.Component<IDocumentPortalProps, IDocumentPortalState> {
 
@@ -139,7 +146,9 @@ export default class DocumentPortal extends React.Component<IDocumentPortalProps
       EditAddedTag : "",
       IsAdmin : true,
       CurrentUserEmail : "",
-      MyChecklistRequestData : []
+      MyChecklistRequestData : [],
+      SendChecklistRequestDocuments : [],
+      SelectedItems : []
     };
 
   }
@@ -176,16 +185,8 @@ export default class DocumentPortal extends React.Component<IDocumentPortalProps
         key: "CompanyEmail",
         name: "Company Email",
         fieldName: "CompanyEmail",
-        minWidth: 220,
-        maxWidth : 220,
-        isResizable : false
-      },
-      {
-        key: "Status",
-        name: "Status",
-        fieldName: "Status",
-        minWidth: 130,
-        maxWidth : 130,
+        minWidth: 250,
+        maxWidth : 250,
         isResizable : false
       },
       {
@@ -212,8 +213,8 @@ export default class DocumentPortal extends React.Component<IDocumentPortalProps
         key : "Actions",
         name: "Actions",
         fieldName : "",
-        minWidth : 150,
-        maxWidth : 150,
+        minWidth : 160,
+        maxWidth : 160,
         isResizable : false,
         onRender : (item) => {
           return(
@@ -428,7 +429,8 @@ export default class DocumentPortal extends React.Component<IDocumentPortalProps
                       <PrimaryButton
                         iconProps={SendIcon}
                         text="Submit"
-                        onClick={() => this.AddChecklistRequest()}
+                        onClick={() => 
+                          this.AddChecklistRequest()}
                       />
                   </div>
                 
@@ -669,101 +671,344 @@ export default class DocumentPortal extends React.Component<IDocumentPortalProps
   }
 
   public async componentDidMount() {
-    this.GetProjectChecklistName();
-    this.GetchecklistRequest();
-    this.GetChecklistDocuments();
-    this.GetChecklistRequestItem();
-    this.GetCurrentUser();
-    this.HideNavigation();
+      this.GetProjectChecklistName();
+      this.GetchecklistRequest();
+      this.GetChecklistDocuments();
+      this.GetChecklistRequestItem();
+      this.GetCurrentUser();
+      this.HideNavigation();
   }
-
-  // public async GetCurrentUser() {
-  //   let ownerGroup = await sp.web.associatedOwnerGroup();
-  //   console.log(ownerGroup);
-
-  //     if(ownerGroup.OwnerTitle) {
-  //       this.setState({ IsAdmin : false });
-  //     }
-     
-  //    console.log(this.state.IsAdmin);
-  // }
 
   public async GetCurrentUser() {
-    try {
-      const currentUser = await sp.web.currentUser.get();
-      const userEmail = currentUser.Email.toLowerCase().trim();
-      const ownerGroup = await sp.web.associatedOwnerGroup();
-      const groupUsers = await sp.web.siteGroups.getById(ownerGroup.Id).users();
-  
-      const isAdmin = groupUsers.some(user =>
-        user.LoginName.toLowerCase() === currentUser.LoginName.toLowerCase()
-      );
-  
-      this.setState({ IsAdmin: isAdmin, CurrentUserEmail : userEmail });
-      console.log("IsAdmin:", isAdmin);
-    } catch (error) {
-      console.error("Error checking admin status:", error);
-      this.setState({ IsAdmin: false }); 
-    }
+      try {
+        const currentUser = await sp.web.currentUser.get();
+        const userEmail = currentUser.Email.toLowerCase().trim();
+        const ownerGroup = await sp.web.associatedOwnerGroup();
+        const groupUsers = await sp.web.siteGroups.getById(ownerGroup.Id).users();
+    
+        const isAdmin = groupUsers.some(user =>
+          user.LoginName.toLowerCase() === currentUser.LoginName.toLowerCase()
+        );
+    
+        this.setState({ IsAdmin: isAdmin, CurrentUserEmail : userEmail });
+        console.log("IsAdmin:", isAdmin);
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        this.setState({ IsAdmin: false }); 
+      }
   }
-  
-
+    
   public  onChange = (event, option) => {
-    let selectedItems = this.state.RequiredDocuments;
-    if (option.selected) {
-      selectedItems.push(option.key); // Add to the selected items array
-    } else {
-      // Remove from the selected items array
-      (selectedItems => selectedItems.filter(item => item !== option.key));
-    }
-    this.setState({ RequiredDocuments: selectedItems });
+      let selectedItems = this.state.RequiredDocuments;
+      if (option.selected) {
+        selectedItems.push(option.key); // Add to the selected items array
+      } else {
+        // Remove from the selected items array
+        (selectedItems => selectedItems.filter(item => item !== option.key));
+      }
+      this.setState({ RequiredDocuments: selectedItems });
   }
 
   public async GetProjectChecklistName () {
-    const requestItem = await sp.web.lists.getByTitle("Project Checklists").items.select(
-      "ID",
-      "ChecklistName"
-    ).get().then((data) => {
-      let RequestData = [];
-      data.forEach(function (dname ,i) {
-        RequestData.push({ key : dname.ID , text: dname.ChecklistName });
+      const requestItem = await sp.web.lists.getByTitle("Project Checklists").items.select(
+        "ID",
+        "ChecklistName"
+      ).get().then((data) => {
+        let RequestData = [];
+        data.forEach(function (dname ,i) {
+          RequestData.push({ key : dname.ID , text: dname.ChecklistName });
+        });
+        console.log(requestItem);
+        this.setState({ ChecklistRequestlist : RequestData });
+      })
+      .catch((error) => {
+        console.log(error);
       });
-      console.log(requestItem);
-      this.setState({ ChecklistRequestlist : RequestData });
-    })
-    .catch((error) => {
-      console.log(error);
-    });
   }
 
- public async GetChecklistDocuments() {
-    const documentlist = await sp.web.lists.getByTitle("Checklist Documents").items.select(
-      "ID",
-      "Title",
-      "ChecklistName/ChecklistName",
-      "ChecklistName/ID"
-    ).expand("ChecklistName").get().then((data) => {
-      let AllData = [];
-      console.log(data);
-      console.log(documentlist);
+  public async GetChecklistDocuments() {
+      const documentlist = await sp.web.lists.getByTitle("Checklist Documents").items.select(
+        "ID",
+        "Title",
+        "ChecklistName/ChecklistName",
+        "ChecklistName/ID"
+      ).expand("ChecklistName").get().then((data) => {
+        let AllData = [];
+        console.log(data);
+        console.log(documentlist);
 
-      if(data.length > 0){
-        data.forEach((item) => {
-          AllData.push({
-            ID : item.Id ? item.Id : "",
-            Title : item.Title ? item.Title : "",
-            ChecklistName : item.ChecklistName ? item.ChecklistName.ChecklistName : "",
+        if(data.length > 0){
+          data.forEach((item) => {
+            AllData.push({
+              ID : item.Id ? item.Id : "",
+              Title : item.Title ? item.Title : "",
+              ChecklistName : item.ChecklistName ? item.ChecklistName.ChecklistName : "",
+            });
+          });
+          this.setState({ ChecklistDocuments : AllData });
+          console.log(this.state.ChecklistDocuments);
+        }
+      }).catch((error) => {
+        console.log(error); 
+      });
+  }
+
+  public async GetchecklistRequest() {
+      try {
+        const currentUser = await sp.web.currentUser.get();
+        const currentUserEmail = currentUser.Email.toLowerCase();
+
+        const isAdmin = await this.GetCurrentUser(); 
+
+        let checklistItems = [];
+    
+        if (this.state.IsAdmin) {
+          checklistItems = await sp.web.lists.getByTitle("Checklist Requests").items
+            .select(
+              "ID",
+              "CompanyName",
+              "ChecklistName/ChecklistName",
+              "ChecklistName/ID",
+              "CompanyEmail",
+              "RequiredDocuments"
+            )
+            .expand("ChecklistName")
+            .orderBy("ID", false)
+            .get();
+        } else {
+          checklistItems = await sp.web.lists.getByTitle("Checklist Requests").items
+            .filter(`CompanyEmail eq '${currentUserEmail}'`)
+            .select(
+              "ID",
+              "CompanyName",
+              "ChecklistName/ChecklistName",
+              "ChecklistName/ID",
+              "CompanyEmail",
+              "RequiredDocuments",
+            )
+            .expand("ChecklistName")
+            .orderBy("ID", false)
+            .get();
+        }
+    
+        const AllData = checklistItems.map((item) => ({
+          ID : item.Id ? item.Id : "",
+          CompanyName : item.CompanyName ? item.CompanyName : "",
+          ChecklistName : item.ChecklistName ? item.ChecklistName.ChecklistName : "",
+          ChecklistNameId : item.ChecklistName ? item.ChecklistName.ID : "",
+          CompanyEmail : item.CompanyEmail ? item.CompanyEmail : "",
+          RequiredDocuments : item.RequiredDocuments ? item.RequiredDocuments : ""
+        }));
+    
+        this.setState({ CheckListRequestData: AllData , AllChecklistRequestData : AllData });
+        console.log(this.state.CheckListRequestData);
+      } catch (error) {
+        console.error("Error fetching checklist requests:", error);
+      }
+  }
+
+  public async GetChecklistRequestItem() {
+      const choiceFieldName2 = "Required Documents";
+      const field2 = await sp.web.lists.getByTitle("Checklist Requests").fields.getByInternalNameOrTitle(choiceFieldName2)();
+      let requireddocuments = [];
+      field2["Choices"].forEach(function (dname,i) {
+        requireddocuments.push({ key : dname , text : dname });
+      });
+      console.log(field2);
+      this.setState({ RequiredDocumentslist : requireddocuments });
+  }
+
+  public async handleChecklistName(SelectedChecklistName) {
+      let checklist = this.state.ChecklistDocuments;
+      const selectedChecklist = checklist.filter((item) => {
+        if(item.ChecklistName == SelectedChecklistName) {
+          return item;
+        }
+      }
+    );
+      console.log(selectedChecklist);
+      this.setState({ SelectedChecklistDocument : selectedChecklist });
+  }
+
+  public async SaveDocuments() {
+      let documents = this.state.SelectedChecklistDocument;
+      documents.push({
+        ID : "",
+        Title : this.state.CustomDocumentsSave,
+        ChecklistName : this.state.ChecklistName
+      });
+      this.setState({ SelectedChecklistDocument : documents });
+      this.setState({ AddCustomDocDialog : true });
+  }
+
+  public async UnSaveDocument(titleToRemove: string) {
+      let documents = this.state.SelectedChecklistDocument;
+    
+      let updatedDocuments = documents.filter(doc => doc.Title !== titleToRemove);
+
+      this.setState({ 
+        SelectedChecklistDocument: updatedDocuments,
+      });
+  }
+    
+  public async AddChecklistRequest() {
+        if(this.state.CompanyName.length == 0) {
+          alert("Please Complete Details.");
+        }
+        else
+        {
+            const addRequest : any = await sp.web.lists.getByTitle("Checklist Requests").items.add({
+              CompanyName : this.state.CompanyName,
+              ChecklistNameId : this.state.ChecklistNameID,
+              CompanyEmail : this.state.CompanyEmail,
+              RequiredDocuments : { results : this.state.SelectedChecklistDocument.map((doc) => doc.Title)} 
+          }).catch((error) => {
+            console.log(error);
+          });
+
+          let requestDoc = "Request Document";
+          
+          this.state.SelectedChecklistDocument.forEach((item) => {
+            sp.web.lists.getByTitle(requestDoc).items.add({
+              Title : item.Title,
+              RequestIDId : addRequest.data.ID
+            }).then((data) => {
+              console.log(data);
+            }).catch((error) => {
+              console.log(error);
+            });
+          });
+
+          let adminDoc = "Admin Documents";
+          
+          this.state.SelectedChecklistDocument.forEach((item) => {
+            sp.web.lists.getByTitle(adminDoc).items.add({
+              Title : item.Title,
+              RequestIDId : addRequest.data.ID
+            }).then((data) => {
+              console.log(data);
+            }).catch((error) => {
+              console.log(error);
+            });
+          });
+
+          this.GetchecklistRequest();
+          this.setState({ CheckListRequestData : addRequest });
+          this.setState({ AddRequestDialog : true });
+        }
+  }
+
+  private async applyVendorFilters(Test)
+    {
+      if(Test)
+      {
+        let SerchText = Test.toLowerCase();
+
+      let filteredData = this.state.AllChecklistRequestData.filter((x) => {
+        let CompanyName = x.CompanyName.toLowerCase();
+        let CompanyEmail = x.CompanyEmail.toLowerCase();
+        return(
+          CompanyName.includes(SerchText) || CompanyEmail.includes(SerchText)
+        );
+      });
+
+      this.setState({ CheckListRequestData:filteredData });
+      }
+      else
+      {
+        this.setState({ CheckListRequestData:this.state.AllChecklistRequestData });
+      }
+  }
+
+  public async GetEditChecklistRequest(ID) {
+      let Editchecklistrequest = this.state.CheckListRequestData.filter((item) => {
+        if(item.ID == ID) {
+          return item;
+        }
+      });
+
+      let editDocdata = [];
+      if(Editchecklistrequest[0].RequiredDocuments.length > 0){
+        Editchecklistrequest[0].RequiredDocuments.forEach((item) => {
+          editDocdata.push({
+            ID : "",
+            Title : item,
+            ChecklistName : Editchecklistrequest[0].ChecklistName
           });
         });
-        this.setState({ ChecklistDocuments : AllData });
-        console.log(this.state.ChecklistDocuments);
+        this.setState({ SelectedChecklistDocument : editDocdata });
+        console.log(this.state.SelectedChecklistDocument);
       }
-    }).catch((error) => {
-      console.log(error); 
+      console.log(Editchecklistrequest);
+      this.setState({
+        EditCompanyName : Editchecklistrequest[0].CompanyName,
+        EditCompanyEmail : Editchecklistrequest[0].CompanyEmail,
+        EditChecklistNameID : Editchecklistrequest[0].ChecklistNameId,
     });
   }
 
-  // public async GetchecklistRequest() {
+  public async UpdateChecklistRequest(CurrentChecklistRequestID) {
+
+      const updaterquestlist = await sp.web.lists.getByTitle("Checklist Requests").items.getById(CurrentChecklistRequestID).update({
+        CompanyName : this.state.EditCompanyName,
+        ChecklistNameId : this.state.EditChecklistNameID,
+        CompanyEmail : this.state.EditCompanyEmail,
+        RequiredDocuments : {results : this.state.SelectedChecklistDocument.map((doc) => doc.Title)}
+      }).catch((error) => {
+        console.log(error);
+      });
+      this.setState({ EditChecklistRequestDialog : true });
+      this.setState({ CheckListRequestData : updaterquestlist });
+      this.GetchecklistRequest();
+  } 
+
+  public async DeleteChecklists(DeleteSelectedChecklistID) {
+      const deletechecklist = await sp.web.lists.getByTitle("Checklist Requests").items.getById(DeleteSelectedChecklistID).delete();
+      this.setState({ CheckListRequestData : deletechecklist});
+      this.setState({ DeleteChecklistRequestDialog : true });
+      this.GetchecklistRequest();
+  }
+
+  public async HideNavigation(){
+    
+      try {
+        // Get current user's groups
+        const userGroups = await sp.web.currentUser.groups();
+
+        // Check if the user is in the Owners or Admins group
+        const isAdmin = userGroups.some(group => 
+          group.Title.indexOf("Owners") !== -1 
+          || 
+          group.Title.indexOf("Admins") !== -1
+        );
+
+        if (!isAdmin) {
+          // Hide the navigation bar for non-admins
+          const navBar = document.querySelector("#SuiteNavWrapper");
+          if (navBar) {
+            navBar.setAttribute("style", "display: none;");
+          }
+        } else {
+            // Show the navigation bar for admins
+            const navBar = document.querySelector("#SuiteNavWrapper");
+            if (navBar) {
+                navBar.setAttribute("style", "display: block;");
+            }
+        }
+    } catch (error) {
+        console.error("Error checking user permissions: ", error);
+    }
+
+  }
+
+  
+
+}
+
+
+
+
+// public async GetchecklistRequest() {
   //   const request = await sp.web.lists.getByTitle("Checklist Requests").items.select(
   //     "ID",
   //     "CompanyName",
@@ -796,250 +1041,3 @@ export default class DocumentPortal extends React.Component<IDocumentPortalProps
   //     console.log(error);
   //   });
   // }
-
-  public async GetchecklistRequest() {
-    try {
-      const currentUser = await sp.web.currentUser.get();
-      const currentUserEmail = currentUser.Email.toLowerCase();
-
-      const isAdmin = await this.GetCurrentUser(); 
-
-      let checklistItems = [];
-  
-      if (this.state.IsAdmin) {
-        checklistItems = await sp.web.lists.getByTitle("Checklist Requests").items
-          .select(
-            "ID",
-            "CompanyName",
-            "ChecklistName/ChecklistName",
-            "ChecklistName/ID",
-            "CompanyEmail",
-            "RequiredDocuments",
-            "Status"
-          )
-          .expand("ChecklistName")
-          .get();
-      } else {
-        checklistItems = await sp.web.lists.getByTitle("Checklist Requests").items
-          .filter(`CompanyEmail eq '${currentUserEmail}'`)
-          .select(
-            "ID",
-            "CompanyName",
-            "ChecklistName/ChecklistName",
-            "ChecklistName/ID",
-            "CompanyEmail",
-            "RequiredDocuments",
-            "Status"
-          )
-          .expand("ChecklistName")
-          .get();
-      }
-  
-      const AllData = checklistItems.map((item) => ({
-        ID : item.Id ? item.Id : "",
-        CompanyName : item.CompanyName ? item.CompanyName : "",
-        ChecklistName : item.ChecklistName ? item.ChecklistName.ChecklistName : "",
-        ChecklistNameId : item.ChecklistName ? item.ChecklistName.ID : "",
-        CompanyEmail : item.CompanyEmail ? item.CompanyEmail : "",
-        RequiredDocuments : item.RequiredDocuments ? item.RequiredDocuments : "",
-        Status : item.Status ? item.Status : ""
-      }));
-  
-      this.setState({ CheckListRequestData: AllData , AllChecklistRequestData : AllData });
-      console.log(this.state.CheckListRequestData);
-    } catch (error) {
-      console.error("Error fetching checklist requests:", error);
-    }
-  }
-  
-
-  public async GetChecklistRequestItem() {
-    const choiceFieldName2 = "Required Documents";
-    const field2 = await sp.web.lists.getByTitle("Checklist Requests").fields.getByInternalNameOrTitle(choiceFieldName2)();
-    let requireddocuments = [];
-    field2["Choices"].forEach(function (dname,i) {
-      requireddocuments.push({ key : dname , text : dname });
-    });
-    console.log(field2);
-    this.setState({ RequiredDocumentslist : requireddocuments });
-  }
-
-  public async handleChecklistName(SelectedChecklistName) {
-    let checklist = this.state.ChecklistDocuments;
-    const selectedChecklist = checklist.filter((item) => {
-      if(item.ChecklistName == SelectedChecklistName) {
-        return item;
-      }
-    }
-  );
-    console.log(selectedChecklist);
-    this.setState({ SelectedChecklistDocument : selectedChecklist });
-  }
-
-  public async SaveDocuments() {
-    let documents = this.state.SelectedChecklistDocument;
-    documents.push({
-      ID : "",
-      Title : this.state.CustomDocumentsSave,
-      ChecklistName : this.state.ChecklistName
-    });
-    this.setState({ SelectedChecklistDocument : documents });
-    this.setState({ AddCustomDocDialog : true });
-  }
-
-  public async UnSaveDocument(titleToRemove: string) {
-    let documents = this.state.SelectedChecklistDocument;
-  
-    let updatedDocuments = documents.filter(doc => doc.Title !== titleToRemove);
-
-    this.setState({ 
-      SelectedChecklistDocument: updatedDocuments,
-    });
-  }
-  
-
-  public async AddChecklistRequest() {
-      if(this.state.CompanyName.length == 0) {
-        alert("Please Complete Details.");
-      }
-      else
-      {
-          const addRequest : any = await sp.web.lists.getByTitle("Checklist Requests").items.add({
-            CompanyName : this.state.CompanyName,
-            ChecklistNameId : this.state.ChecklistNameID,
-            CompanyEmail : this.state.CompanyEmail,
-            RequiredDocuments : { results : this.state.SelectedChecklistDocument.map((doc) => doc.Title)} 
-        }).catch((error) => {
-          console.log(error);
-        });
-
-        let requestDoc = "Request Document";
-        
-        this.state.SelectedChecklistDocument.forEach((item) => {
-          sp.web.lists.getByTitle(requestDoc).items.add({
-            Title : item.Title,
-            RequestIDId : addRequest.data.ID
-          }).then((data) => {
-            console.log(data);
-          }).catch((error) => {
-            console.log(error);
-          });
-        });
-
-
-        this.GetchecklistRequest();
-        this.setState({ CheckListRequestData : addRequest });
-        this.setState({ AddRequestDialog : true });
-      }
-  }
-
-  private async applyVendorFilters(Test)
-  {
-    if(Test)
-    {
-      let SerchText = Test.toLowerCase();
-
-    let filteredData = this.state.AllChecklistRequestData.filter((x) => {
-      let CompanyName = x.CompanyName.toLowerCase();
-      let CompanyEmail = x.CompanyEmail.toLowerCase();
-      return(
-        CompanyName.includes(SerchText) || CompanyEmail.includes(SerchText)
-      );
-    });
-
-    this.setState({ CheckListRequestData:filteredData });
-    }
-    else
-    {
-      this.setState({ CheckListRequestData:this.state.AllChecklistRequestData });
-    }
-  }
-
-  public async GetEditChecklistRequest(ID) {
-    let Editchecklistrequest = this.state.CheckListRequestData.filter((item) => {
-      if(item.ID == ID) {
-        return item;
-      }
-    });
-
-    let editDocdata = [];
-    if(Editchecklistrequest[0].RequiredDocuments.length > 0){
-      Editchecklistrequest[0].RequiredDocuments.forEach((item) => {
-        editDocdata.push({
-          ID : "",
-          Title : item,
-          ChecklistName : Editchecklistrequest[0].ChecklistName
-        });
-      });
-      this.setState({ SelectedChecklistDocument : editDocdata });
-      console.log(this.state.SelectedChecklistDocument);
-    }
-    console.log(Editchecklistrequest);
-
-
-
-    this.setState({
-      EditCompanyName : Editchecklistrequest[0].CompanyName,
-      EditCompanyEmail : Editchecklistrequest[0].CompanyEmail,
-      EditChecklistNameID : Editchecklistrequest[0].ChecklistNameId,
-    });
-  }
-
-  public async UpdateChecklistRequest(CurrentChecklistRequestID) {
-
-    const updaterquestlist = await sp.web.lists.getByTitle("Checklist Requests").items.getById(CurrentChecklistRequestID).update({
-      CompanyName : this.state.EditCompanyName,
-      ChecklistNameId : this.state.EditChecklistNameID,
-      CompanyEmail : this.state.EditCompanyEmail,
-      RequiredDocuments : {results : this.state.SelectedChecklistDocument.map((doc) => doc.Title)}
-    }).catch((error) => {
-      console.log(error);
-    });
-
-
-
-    this.setState({ EditChecklistRequestDialog : true });
-    this.setState({ CheckListRequestData : updaterquestlist });
-    this.GetchecklistRequest();
-  } 
-
-  public async DeleteChecklists(DeleteSelectedChecklistID) {
-    const deletechecklist = await sp.web.lists.getByTitle("Checklist Requests").items.getById(DeleteSelectedChecklistID).delete();
-    this.setState({ CheckListRequestData : deletechecklist});
-    this.setState({ DeleteChecklistRequestDialog : true });
-    this.GetchecklistRequest();
-  }
-
-  public async HideNavigation(){
-   
-    try {
-      // Get current user's groups
-      const userGroups = await sp.web.currentUser.groups();
-
-      // Check if the user is in the Owners or Admins group
-      const isAdmin = userGroups.some(group => 
-        group.Title.indexOf("Owners") !== -1 
-        || 
-        group.Title.indexOf("Admins") !== -1
-      );
-
-      if (!isAdmin) {
-        // Hide the navigation bar for non-admins
-        const navBar = document.querySelector("#SuiteNavWrapper");
-        if (navBar) {
-          navBar.setAttribute("style", "display: none;");
-        }
-      } else {
-          // Show the navigation bar for admins
-          const navBar = document.querySelector("#SuiteNavWrapper");
-          if (navBar) {
-              navBar.setAttribute("style", "display: block;");
-          }
-      }
-  } catch (error) {
-      console.error("Error checking user permissions: ", error);
-  }
-
-  }
-
-}
